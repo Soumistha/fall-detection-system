@@ -82,24 +82,27 @@ The dataset includes fall events and normal activities such as walking, sitting,
 
 The dataset is stored separately in Google Drive and is not included in this repository.
 
-## Model Description
+## Model Selection and Training
 
-The project report describes the use of **YOLOv8m**, the medium variant of YOLOv8, fine-tuned on the custom fall detection dataset.
+We selected **YOLOv8m (Medium)** for the final fall detection system after considering YOLOv8n (Nano) as a lighter alternative.
 
-YOLO is used to generate bounding boxes and detection confidence values. Additional processing analyzes posture geometry and movement across consecutive frames.
+YOLOv8n was considered because of its smaller model size and lower computational requirements. However, for our project, we chose YOLOv8m to prioritize the balance between detection performance and computational cost.
+
+YOLOv8m was fine-tuned on our custom fall detection dataset, followed by geometric and motion-based analysis to identify potential falls.
 
 ### Training Configuration
 
 | Parameter | Stage 1 | Stage 2 |
 |---|---:|---:|
+| Model | YOLOv8m | YOLOv8m |
 | Epochs | 40 | 20 |
 | Image size | 640 × 640 | 960 × 960 |
 | Batch size | 8 | 4 |
 | Learning rate | 0.001 | 0.001 |
 
-The report describes a two-stage training strategy, with higher-resolution fine-tuning in Stage 2.
+The two-stage training strategy begins at a lower image resolution and then fine-tunes the model at a higher resolution to capture finer spatial details.
 
-**Note:** Confirm that the final notebook uses the same model variant and training configuration before treating these settings as the definitive implementation details.
+The final model is used for inference, with bounding-box geometry and motion analysis providing additional information for fall assessment.
 
 ## Fall Detection Methodology
 
