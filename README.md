@@ -153,6 +153,12 @@ The report also identifies challenges involving severe occlusion, overlapping bo
 
 Numerical metrics such as accuracy, precision, recall, mAP, and inference speed should be added after verifying the actual evaluation outputs.
 
+## Sample Detection Results
+
+The following examples illustrate normal activity detection and fall detection using the proposed system.
+
+![Normal activity and fall detection results](results/fall.png)
+
 ## Applications
 
 Potential applications include:
