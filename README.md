@@ -1,36 +1,39 @@
 # Video-Based Human Fall Detection Using Deep Learning
 
-A computer vision project that detects potential human falls from recorded video using YOLOv8m, geometric analysis, motion tracking, and a multi-level risk scoring mechanism.
+A deep learning project that detects potential human falls from recorded video using YOLOv8, bounding-box geometry, motion analysis, and a multi-level risk scoring mechanism.
 
-## Project Overview
+## Overview
 
-Falls can pose serious safety risks, particularly for elderly individuals and people with mobility impairments. This project explores a camera-based fall detection approach that does not require wearable sensors.
+Falls are a major safety concern for elderly individuals and people with mobility impairments. This project explores a camera-based fall detection system that does not require wearable sensors.
 
-The system combines YOLOv8m object detection with bounding-box aspect ratio analysis and frame-to-frame motion analysis to distinguish potential falls from normal human activities. A risk score ranging from 0 to 3 provides an additional indication of event severity.
+The system uses a YOLO object detection model to analyze video frames, followed by geometric and motion-based analysis to identify potential falls. A risk score ranging from 0 to 3 provides an indication of the severity of detected events.
+
+The project was developed as part of **BCSE332L — Deep Learning** at Vellore Institute of Technology, Chennai.
 
 ## Objectives
 
 - Develop a video-based human fall detection pipeline using deep learning.
-- Build a custom dataset from publicly available YouTube videos.
-- Analyze bounding-box geometry and vertical displacement across consecutive frames.
-- Reduce false positives by combining visual and motion-based cues.
-- Assign risk levels to detected events for severity-aware monitoring.
+- Create a custom dataset from publicly available YouTube videos.
+- Detect people and analyze their bounding-box characteristics.
+- Track vertical displacement across consecutive frames.
+- Combine geometric and motion-based cues to reduce false positives.
+- Assign risk levels to detected events.
 
 ## Technologies Used
 
-- **Language:** Python
-- **Environment:** Google Colab
-- **Deep Learning:** YOLOv8m
-- **Computer Vision:** OpenCV
-- **Data Processing:** NumPy and other libraries used in the notebook
+- Python
+- Google Colab
+- Ultralytics YOLO
+- OpenCV
+- NumPy, if used in the notebook
 
 ## System Architecture
 
-The system follows a three-layer pipeline:
+The project follows a three-layer architecture.
 
-1. **Input layer:** Load recorded video and extract frames at fixed intervals.
-2. **Processing layer:** Preprocess frames, perform YOLOv8m detection, and analyze bounding-box geometry and motion.
-3. **Output layer:** Display the predicted activity, detection information, and associated risk score.
+1. **Input Layer:** Recorded video is loaded and divided into frames at fixed intervals.
+2. **Processing Layer:** Frames are preprocessed and analyzed by the YOLO model. Bounding-box aspect ratios and motion are then evaluated.
+3. **Output Layer:** The system displays detection information, activity classification, and a risk score.
 
 ### Workflow
 
@@ -44,38 +47,48 @@ Frame Extraction
 Preprocessing
       |
       v
-YOLOv8m Detection
+YOLO Object Detection
       |
       v
-Bounding-Box and Motion Analysis
+Bounding-Box Analysis
       |
       v
-Fall Assessment and Risk Scoring
+Motion Analysis
       |
       v
-Annotated Detection Output
+Fall Assessment
+      |
+      v
+Risk Score (0-3)
+      |
+      v
+Annotated Output
 ```
 
-## Dataset
+## Dataset Description
 
-A custom dataset was developed using video clips collected from publicly available YouTube videos.
+A custom dataset was developed using publicly available YouTube video clips.
 
-The dataset includes fall events and normal activities, such as walking, sitting, bending, and lying down. Frames were extracted and annotated using the YOLO format.
+The dataset includes fall events and normal activities such as walking, sitting, bending, and lying down. Video frames were extracted and annotated using the YOLO annotation format.
 
 **Dataset characteristics:**
+
 - Source: YouTube video clips
 - Classes: Fall and Normal
 - Annotation format: YOLO
-- Environments: Indoor and outdoor scenes with varying lighting and camera angles
-- Preparation: Frame extraction, resizing, annotation, and dataset splitting
+- Environments: Indoor and outdoor scenes
+- Variations: Lighting conditions, camera angles, and human activities
+- Preprocessing: Frame extraction, resizing, annotation, and dataset splitting
 
-The dataset and its annotations are not included in this repository by default. Access to the data may be required to reproduce training.
+The dataset is stored separately in Google Drive and is not included in this repository.
 
-## Model and Training
+## Model Description
 
-The project uses **YOLOv8m**, a single-stage object detection model, fine-tuned on the custom fall detection dataset.
+The project report describes the use of **YOLOv8m**, the medium variant of YOLOv8, fine-tuned on the custom fall detection dataset.
 
-A two-stage training strategy was used:
+YOLO is used to generate bounding boxes and detection confidence values. Additional processing analyzes posture geometry and movement across consecutive frames.
+
+### Training Configuration
 
 | Parameter | Stage 1 | Stage 2 |
 |---|---:|---:|
@@ -83,101 +96,145 @@ A two-stage training strategy was used:
 | Image size | 640 × 640 | 960 × 960 |
 | Batch size | 8 | 4 |
 | Learning rate | 0.001 | 0.001 |
-| Purpose | Initial feature learning | Higher-resolution fine-tuning |
 
-The Adam optimizer was used, and validation mAP was monitored for early stopping, as described in the project report.
+The report describes a two-stage training strategy, with higher-resolution fine-tuning in Stage 2.
+
+**Note:** Confirm that the final notebook uses the same model variant and training configuration before treating these settings as the definitive implementation details.
 
 ## Fall Detection Methodology
 
-### 1. YOLOv8m Detection
-Each video frame is passed through the trained model to obtain detection information, including bounding boxes and confidence scores.
+### 1. Object Detection
 
-### 2. Bounding-Box Aspect Ratio
-The bounding-box height-to-width ratio is examined as a geometric cue. A more horizontally oriented bounding box can indicate a potential fall, although lying down and other normal activities can produce similar shapes.
+Each video frame is passed through the YOLO model to identify people and obtain bounding-box coordinates and confidence scores.
+
+### 2. Bounding-Box Aspect Ratio Analysis
+
+The height-to-width ratio of a person's bounding box is analyzed to identify potentially horizontal postures. A low ratio can indicate a potential fall, although lying down or other normal activities can produce similar results.
 
 ### 3. Motion Analysis
-The vertical displacement of the bounding-box center is tracked across consecutive frames. Sudden movement can provide additional evidence of a potential fall.
 
-### 4. Combined Assessment
-The geometric and motion-based signals are combined with detection information to distinguish potential falls from normal activities.
+The vertical position of the bounding-box center is tracked across consecutive frames. Sudden displacement can provide evidence of a potential fall.
 
-## Risk Scoring
+### 4. Combined Fall Assessment
 
-The system uses a risk score from 0 to 3.
+Detection confidence, bounding-box geometry, and motion information are combined to assess whether a frame or event may represent a fall.
 
-| Score | Risk level | Interpretation |
+## Risk Score Calculation
+
+The project uses a risk score ranging from 0 to 3.
+
+| Score | Risk Level | Interpretation |
 |---:|---|---|
-| 0 | No Risk | Normal human activity |
+| 0 | No Risk | Normal activity |
 | 1 | Low Risk | Minor posture deviation |
 | 2 | Medium Risk | Suspicious motion or potential partial fall |
 | 3 | High Risk | High-confidence fall indication |
 
-The report describes the score as a weighted combination of detection confidence, bounding-box aspect ratio deviation, and vertical motion speed. Exact weights and thresholds should be taken from the implementation.
+According to the project report, the risk score uses detection confidence, bounding-box aspect ratio deviation, and vertical motion speed.
+
+The exact thresholds and weights depend on the implementation in the notebook.
 
 ## Results and Discussion
 
-The project report describes the following qualitative findings:
+The project report describes qualitative evaluation on a held-out test split.
 
-- YOLOv8m detected people under varied lighting conditions and camera angles in the evaluated examples.
-- Aspect-ratio analysis helped identify horizontally oriented postures but could produce false positives for people lying on furniture.
-- Motion analysis provided additional information for distinguishing sudden falls from gradual movements.
-- Higher-resolution fine-tuning was intended to improve the detection of distant subjects.
-- The risk score provided multiple levels of indication rather than a single binary output.
+The reported observations include:
 
-The report also identifies limitations involving severe occlusion, overlapping bounding boxes, multi-person scenes, and dataset size.
+- Person detection across different lighting conditions and camera angles.
+- Aspect-ratio analysis as a useful geometric cue for potential falls.
+- Motion analysis to help distinguish sudden falls from gradual movements.
+- Higher-resolution fine-tuning intended to improve detection of distant subjects.
+- Multi-level risk scoring to distinguish normal activity from potentially serious events.
 
-Numerical accuracy, precision, recall, mAP, and inference speed should be added only when supported by the actual evaluation results.
+The report also identifies challenges involving severe occlusion, overlapping bounding boxes, multi-person scenes, and limited dataset scale.
+
+Numerical metrics such as accuracy, precision, recall, mAP, and inference speed should be added after verifying the actual evaluation outputs.
 
 ## Applications
 
-Potential application areas include:
+Potential applications include:
+
 - Elderly care facilities and hospitals
 - Smart-home safety monitoring
 - Rehabilitation environments
 - Public-space safety monitoring
 
-These are potential applications; the project is an experimental system and is not a clinically validated safety solution.
+These are potential applications rather than claims of validated real-world deployment.
 
 ## Limitations
 
 - Sensitivity to camera angle and bounding-box geometry
+- False positives for activities such as lying down
 - Reduced reliability under severe occlusion
-- Difficulty handling multiple people and overlapping detections
-- Limited dataset scale and coverage of edge cases
-- Recorded-video evaluation in the current project version
+- Challenges with multiple people and overlapping bounding boxes
+- Limited dataset scale and coverage of unusual scenarios
+- The current project version uses recorded-video input
 
 ## Future Work
 
 - Expand the dataset with more diverse fall and normal-activity examples.
-- Integrate pose estimation for improved posture analysis.
+- Integrate pose estimation to improve posture analysis.
 - Improve multi-person tracking.
-- Explore real-time alerting through SMS or IoT integrations.
-- Investigate deployment on edge devices such as Raspberry Pi or NVIDIA Jetson.
+- Explore SMS or IoT-based alerts for high-risk events.
+- Investigate deployment on edge devices such as Raspberry Pi and NVIDIA Jetson.
 
 ## How to Run
 
 1. Open `fall_detection.ipynb` in Google Colab.
-2. Review the installation and configuration cells.
-3. Configure access to the required dataset and trained model weights.
-4. Run the notebook cells in order.
-5. Inspect the annotated video or frame outputs and available evaluation results.
+2. Install the required Python packages.
+3. Mount Google Drive if the notebook uses Drive-based data storage.
+4. Place the dataset in the expected directory structure.
+5. Provide the trained model weights if they are not generated during training.
+6. Run the notebook cells in order.
+7. Review the detection outputs and evaluation results.
 
-The notebook may require changes to file paths or access settings depending on where the dataset and model weights are stored.
+### Dataset and Model Setup
 
-## Team
+The current notebook uses paths under:
+
+```text
+/content/drive/MyDrive/fall_detection_dataset/
+```
+
+It also references trained weights at:
+
+```text
+/content/drive/MyDrive/fall_detection_dataset/best.pt
+```
+
+These paths are specific to the original Colab environment. Update them if your dataset or model weights are stored elsewhere.
+
+The dataset and trained weights are not included in this repository by default.
+
+## Repository Structure
+
+```text
+fall-detection-system/
+├── fall_detection.ipynb
+├── README.md
+├── requirements.txt
+└── results/
+    ├── normal_activity.png
+    └── fall_detection.png
+```
+
+The `results/` directory and its image files can be added when the sample outputs are ready.
+
+## Team Members
 
 - Deepali Banka
 - Soumistha Bhuyan
 - Shruti Sameeksha Pradhan
 
+
 ## References
 
-1. J. Redmon et al., “You Only Look Once: Unified, Real-Time Object Detection,” CVPR, 2016.
-2. Ultralytics, [YOLOv8 Documentation](https://docs.ultralytics.com/).
-3. S. Zhang et al., “Vision-Based Fall Detection Using Deep Learning,” IEEE Access, 2020.
-4. M. Mubashir et al., “A Survey on Fall Detection: Principles and Approaches,” Neurocomputing, 2013.
-5. N. Noury et al., “Fall Detection — Principles and Methods,” Engineering in Medicine and Biology Society, 2007.
+1. J. Redmon et al., "You Only Look Once: Unified, Real-Time Object Detection," CVPR, 2016.
+2. Ultralytics, [YOLO Documentation](https://docs.ultralytics.com/).
+3. S. Zhang et al., "Vision-Based Fall Detection Using Deep Learning," IEEE Access, 2020.
+4. M. Mubashir et al., "A Survey on Fall Detection: Principles and Approaches," Neurocomputing, 2013.
+5. N. Noury et al., "Fall Detection — Principles and Methods," Engineering in Medicine and Biology Society, 2007.
 
 ## Disclaimer
 
-This project was developed for academic and research purposes. Its predictions should not be treated as a substitute for professional medical assessment or a validated emergency monitoring system.
+This project was developed for academic and research purposes. Its outputs should not be treated as a substitute for professional medical assessment or a clinically validated emergency monitoring system.
